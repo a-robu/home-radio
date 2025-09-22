@@ -1,4 +1,4 @@
-import { BottomNavigation } from "../components/bottom-navigation";
+import { NavBar } from "../components/nav-bar";
 
 export default function AppLayout({
   children,
@@ -8,7 +8,7 @@ export default function AppLayout({
   return (
     <>
       {children}
-      <BottomNavigation />
+      <NavBar />
     </>
   );
 }

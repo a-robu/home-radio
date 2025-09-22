@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { Music, List, Clock, Settings } from "lucide-react";
 
-export function BottomNavigation() {
+export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
 
