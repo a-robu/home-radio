@@ -6,8 +6,23 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="max-w-md mx-auto h-screen flex flex-col">
-      <div className="flex-1 overflow-y-auto">{children}</div>
+    // The only target device is the Pixel 8a with w = 412px and h = 915px
+    <div
+      className="flex flex-col"
+      style={{
+        maxWidth: "412px",
+        height: "100vh",
+        maxHeight: "915px",
+      }}
+    >
+      <div
+        className="flex-1 overflow-y-auto bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/background-sky-white-birds.jpg')",
+        }}
+      >
+        {children}
+      </div>
       <NavBar />
     </div>
   );

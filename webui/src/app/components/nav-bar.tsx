@@ -15,7 +15,7 @@ export function NavBar() {
 
   return (
     <div
-      className="border-t border-white/30 px-4 py-2 flex justify-center gap-x-4"
+      className="border-t border-white/30 px-4 py-2 flex justify-between"
       style={{ background: "rgb(4, 22, 32)" }}
     >
       {tabs.map(({ label, icon: Icon, path }) => (
