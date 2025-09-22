@@ -20,25 +20,23 @@ export function NavBar() {
 
   return (
     <div
-      className="border-t border-white/30 px-4 py-2"
-      style={{ background: "rgb(4, 22, 32)", borderColor: "rgb(80, 92, 100)" }}
+      className="border-t border-white/30 px-4 py-2 flex justify-center gap-x-4"
+      style={{ background: "rgb(4, 22, 32)" }}
     >
-      <div className="flex justify-around items-center">
-        {tabs.map(({ id, label, icon: Icon, path }) => (
-          <button
-            key={id}
-            onClick={() => handleTabClick(path)}
-            className={`flex flex-col items-center py-2 px-3 p-6 rounded-lg transition-colors ${
-              pathname === path
-                ? "text-white bg-black/50"
-                : "text-white/80 hover:text-white hover:bg-white/20"
-            }`}
-          >
-            <Icon size={20} />
-            <span className="text-xs mt-1 font-medium">{label}</span>
-          </button>
-        ))}
-      </div>
+      {tabs.map(({ id, label, icon: Icon, path }) => (
+        <button
+          key={id}
+          onClick={() => handleTabClick(path)}
+          className={`flex flex-col items-center py-2 px-3 rounded-lg ${
+            pathname === path
+              ? "text-white bg-black/50"
+              : "text-white/80 hover:text-white hover:bg-white/20"
+          }`}
+        >
+          <Icon size={20} />
+          <span className="text-xs mt-1 font-medium">{label}</span>
+        </button>
+      ))}
     </div>
   );
 }
