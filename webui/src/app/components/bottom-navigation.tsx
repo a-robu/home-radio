@@ -19,13 +19,16 @@ export function BottomNavigation() {
   };
 
   return (
-    <div className="bg-black/40 backdrop-blur-md border-t border-white/30 px-4 py-2">
+    <div
+      className="border-t border-white/30 px-4 py-2"
+      style={{ background: "rgb(4, 22, 32)", borderColor: "rgb(80, 92, 100)" }}
+    >
       <div className="flex justify-around items-center">
         {tabs.map(({ id, label, icon: Icon, path }) => (
           <button
             key={id}
             onClick={() => handleTabClick(path)}
-            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+            className={`flex flex-col items-center py-2 px-3 p-6 rounded-lg transition-colors ${
               pathname === path
                 ? "text-white bg-black/50"
                 : "text-white/80 hover:text-white hover:bg-white/20"

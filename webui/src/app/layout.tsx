@@ -24,7 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        style={{
+          backgroundColor: "rgb(7, 36, 54)",
+        }}
+      >
         {children}
       </body>
     </html>
