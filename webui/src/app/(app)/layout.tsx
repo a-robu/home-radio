@@ -16,10 +16,10 @@ export default function AppLayout({
       }}
     >
       <div
-        className="flex-1 overflow-y-auto bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/background-sky-white-birds.jpg')",
-        }}
+        className="flex-1 overflow-y-auto bg-cover bg-center bg-relaxing-purple"
+        // style={{
+        //   backgroundImage: "url('/background-sky-white-birds.jpg')",
+        // }}
       >
         {children}
       </div>

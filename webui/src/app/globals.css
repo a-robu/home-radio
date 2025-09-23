@@ -14,3 +14,9 @@ body {
 a {
   text-decoration: none;
 }
+
+@theme {
+  --color-relaxing-purple: rgb(92, 82, 133);
+  --color-foundation-navy: rgb(4, 22, 32);
+  --color-knob-white: #fdfcff;
+}
