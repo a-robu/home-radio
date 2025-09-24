@@ -1,10 +1,17 @@
 "use client";
 
-import BlockChoices from "@/app/components/recipe/block-choices";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { GripVertical } from "lucide-react";
+import {
+  AudioWaveform,
+  Eraser,
+  GripVertical,
+  Mic,
+  Music,
+  Radio,
+  Save,
+} from "lucide-react";
 
 function Sortable({ id }: { id: number }) {
   const { setNodeRef, attributes, listeners, transform, transition } =
@@ -19,9 +26,7 @@ function Sortable({ id }: { id: number }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={
-        "flex rounded-sm p-2 justify-start gap-1.5 bg-black/15 text-white select-none"
-      }
+      className="flex rounded-sm p-2 justify-start gap-1.5 bg-black/15 text-white select-none"
     >
       <button
         type="button"
@@ -36,6 +41,9 @@ function Sortable({ id }: { id: number }) {
     </div>
   );
 }
+
+const GRID_BUTTON_CLASSES =
+  "flex justify-center gap-1.5 px-2 py-2 cursor-pointer rounded-sm";
 
 export default function Page() {
   const items = [0, 1, 2, 3];
@@ -53,7 +61,44 @@ export default function Page() {
           </SortableContext>
         </DndContext>
       </div>
-      <BlockChoices />
+      <div className="grid grid-cols-2 gap-3 m-3">
+        <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+          <Music className="inline-block" />
+          <span>Add Navidrome</span>
+        </button>
+        <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+          <Mic className="inline-block" />
+          <span>Add Podcast</span>
+        </button>
+        <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+          <AudioWaveform className="inline-block" />
+          <span>Add Caddy File</span>
+        </button>
+        <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+          <Radio className="inline-block" />
+          <span>Add Radio Station</span>
+        </button>
+      </div>
+      <div>
+        <div className="flex gap-3 m-3">
+          <button
+            type="button"
+            className={GRID_BUTTON_CLASSES + " flex-1 bg-black/35 text-white"}
+          >
+            <Eraser className="inline-block" />
+            <span>Cancel Changes</span>
+          </button>
+          <button
+            type="button"
+            className={
+              GRID_BUTTON_CLASSES + " flex-1 bg-salvation-green text-white"
+            }
+          >
+            <Save className="inline-block" />
+            <span>Save Changes</span>
+          </button>
+        </div>
+      </div>
     </>
   );
 }
