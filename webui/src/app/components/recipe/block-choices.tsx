@@ -3,7 +3,7 @@ import AddBlockButton from "./add-button";
 
 export default function BlockChoices() {
   return (
-    <div className="grid grid-cols-2 gap-3 p-3">
+    <div className="grid grid-cols-2 gap-3 m-3">
       <AddBlockButton>
         <Music className="inline-block" />
         <span>Add Navidrome</span>

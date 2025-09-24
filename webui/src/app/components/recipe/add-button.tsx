@@ -6,7 +6,7 @@ export default function AddBlockButton({
   return (
     <button
       className={
-        "flex cursor-pointer rounded-sm p-2 justify-center gap-1.5 bg-white/20 border-white/30 " +
+        "flex cursor-pointer rounded-sm p-2 justify-center gap-1.5 bg-white/20 " +
         "text-white hover:bg-white/30"
       }
     >
