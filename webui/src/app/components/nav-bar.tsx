@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Music, Clock, Settings, ListMusic } from "lucide-react";
+import Link from "next/link";
 
 export function NavBar() {
   const pathname = usePathname();
@@ -16,7 +17,7 @@ export function NavBar() {
   return (
     <div className="border-t border-white/30 px-4 py-2 flex justify-between bg-foundation-navy">
       {tabs.map(({ label, icon: Icon, path }) => (
-        <a
+        <Link
           key={path}
           href={path}
           className={`flex flex-col items-center py-2 px-3 rounded-lg select-none ${
@@ -27,7 +28,7 @@ export function NavBar() {
         >
           <Icon size={20} />
           <span className="text-xs mt-1 font-medium">{label}</span>
-        </a>
+        </Link>
       ))}
     </div>
   );
