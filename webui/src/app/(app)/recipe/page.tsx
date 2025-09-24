@@ -12,6 +12,7 @@ import {
   Radio,
   Save,
 } from "lucide-react";
+import { useState } from "react";
 
 function Sortable({ id }: { id: number }) {
   const { setNodeRef, attributes, listeners, transform, transition } =
@@ -46,14 +47,32 @@ const GRID_BUTTON_CLASSES =
   "flex justify-center gap-1.5 px-2 py-2 cursor-pointer rounded-sm";
 
 export default function Page() {
-  const items = [0, 1, 2, 3];
+  const [items, setItems] = useState([0, 1, 2, 3]);
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        const newItems = [...items];
+        newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, active.id);
+        return newItems;
+      });
+    }
+  };
+
   return (
     <>
       <p className="text-center text-white m-4">
         Add configuration blocks to procedurally generate your daily playlist.
       </p>
       <div className="flex flex-col gap-3 m-3">
-        <DndContext modifiers={[restrictToVerticalAxis]}>
+        <DndContext
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
+        >
           <SortableContext items={items}>
             {items.map((id) => (
               <Sortable key={id} id={id} />
