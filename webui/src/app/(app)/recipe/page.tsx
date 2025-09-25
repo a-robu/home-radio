@@ -106,12 +106,11 @@ function Sortable({ itemWithId }: { itemWithId: WithID<RecipeItem> }) {
         <GripVertical className="touch-manipulation" />
       </div>
       <ItemIcon className="inline-block" />
-      {/* e.g. title and artists on two lines */}
       <div className="flex flex-col ml-2">
         <span className="font-semibold">{itemLines[0]}</span>
         <span className="text-sm text-white/70">{itemLines[1]}</span>
       </div>
-      <button className="ml-auto p-2 rounded bg-white/10">
+      <button className="ml-auto p-2 rounded bg-white/10 cursor-pointer">
         <Settings />
       </button>
     </div>
