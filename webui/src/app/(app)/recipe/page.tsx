@@ -171,13 +171,16 @@ export default function Page() {
     NavidromePlaylist[] | undefined
   >(undefined);
 
-  function updateHasChanges() {
+  function updateHasChanges(newItems: WithID<RecipeItem>[]) {
     // Ignore fields added by dnd-kit
-    const minimalOriginal = originalItems.map(({ id, item }) => ({ id, item }));
-    const minimalNew = items.map(({ id, item }) => ({ id, item }));
+    const filteredOriginal = originalItems.map(({ id, item }) => ({
+      id,
+      item,
+    }));
+    const filteredNew = newItems.map(({ id, item }) => ({ id, item }));
     setHasChanges(
       // TODO use a better deep equality check
-      !(JSON.stringify(minimalOriginal) === JSON.stringify(minimalNew))
+      !(JSON.stringify(filteredOriginal) === JSON.stringify(filteredNew))
     );
   }
 
@@ -192,7 +195,7 @@ export default function Page() {
         const newItems = [...items];
         newItems.splice(oldIndex, 1);
         newItems.splice(newIndex, 0, items[oldIndex]);
-        updateHasChanges();
+        updateHasChanges(newItems);
         return newItems;
       });
     }
