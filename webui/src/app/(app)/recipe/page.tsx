@@ -162,7 +162,7 @@ export default function Page() {
     },
   ];
 
-  const [seq, setSeq] = useState(5);
+  const [seq, setSeq] = useState(11);
   const nextID = () => {
     let id = seq;
     setSeq((s) => s + 1);
@@ -191,11 +191,8 @@ export default function Page() {
 
   function updateHasChanges(newItems: WithID<RecipeItem>[]) {
     // Ignore fields added by dnd-kit
-    const filteredOriginal = originalItems.map(({ id, item }) => ({
-      id,
-      item,
-    }));
-    const filteredNew = newItems.map(({ id, item }) => ({ id, item }));
+    const filteredOriginal = originalItems.map(({ item }) => item);
+    const filteredNew = newItems.map(({ item }) => item);
     setHasChanges(
       // TODO use a better deep equality check
       !(JSON.stringify(filteredOriginal) === JSON.stringify(filteredNew))
@@ -273,53 +270,55 @@ export default function Page() {
 
   if (formState.mode === "ListView") {
     return (
-      <>
-        <p className="text-center text-white m-4">
-          These blocks generate your playlist.
-        </p>
-        <div className="flex flex-col gap-3 m-3">
-          <DndContext
-            id={dndId}
-            modifiers={[restrictToVerticalAxis]}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={items}>
-              {items.map((element) => (
-                <Sortable key={element.id} itemWithId={element} />
-              ))}
-              {items.length === 0 && (
-                <div className="text-center py-8 text-white/80">
-                  <p>No blocks added yet</p>
-                  <p className="text-sm text-white/70">
-                    Add blocks to get started
-                  </p>
-                </div>
-              )}
-            </SortableContext>
-          </DndContext>
+      <div className="flex flex-col h-full">
+        <div className="overflow-y-auto">
+          <p className="text-center text-white m-4">
+            These blocks generate your playlist.
+          </p>
+          <div className="flex flex-col gap-3 m-3">
+            <DndContext
+              id={dndId}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={items}>
+                {items.map((element) => (
+                  <Sortable key={element.id} itemWithId={element} />
+                ))}
+                {items.length === 0 && (
+                  <div className="text-center py-8 text-white/80">
+                    <p>No blocks added yet</p>
+                    <p className="text-sm text-white/70">
+                      Add blocks to get started
+                    </p>
+                  </div>
+                )}
+              </SortableContext>
+            </DndContext>
+          </div>
+          <div className="grid grid-cols-2 gap-3 p-3 bg-relaxing-blue">
+            <button
+              className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}
+              onClick={() => setFormState({ mode: "Add", itemType: "songs" })}
+            >
+              <ICONS.songs className="inline-block" />
+              <span>Add Navidrome</span>
+            </button>
+            <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+              <ICONS.podcast className="inline-block" />
+              <span>Add Podcast</span>
+            </button>
+            <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+              <ICONS.caddy className="inline-block" />
+              <span>Add Caddy File</span>
+            </button>
+            <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
+              <ICONS.radio className="inline-block" />
+              <span>Add Radio Station</span>
+            </button>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 p-3 bg-relaxing-blue">
-          <button
-            className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}
-            onClick={() => setFormState({ mode: "Add", itemType: "songs" })}
-          >
-            <ICONS.songs className="inline-block" />
-            <span>Add Navidrome</span>
-          </button>
-          <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-            <ICONS.podcast className="inline-block" />
-            <span>Add Podcast</span>
-          </button>
-          <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-            <ICONS.caddy className="inline-block" />
-            <span>Add Caddy File</span>
-          </button>
-          <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-            <ICONS.radio className="inline-block" />
-            <span>Add Radio Station</span>
-          </button>
-        </div>
-        <div className="flex gap-3 p-3">
+        <div className="flex gap-3 p-3 mt-auto">
           <button
             type="button"
             className={
@@ -347,7 +346,7 @@ export default function Page() {
             <span>Save Changes</span>
           </button>
         </div>
-      </>
+      </div>
     );
   } else {
     return (
