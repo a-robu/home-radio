@@ -16,8 +16,8 @@ import {
 import { useState } from "react";
 
 interface SongsBlock {
-  song_title: string;
-  artist_name: string;
+  playlist_name: string;
+  n_songs: number;
 }
 
 interface PodcastBlock {
@@ -46,7 +46,15 @@ type WithID<T> = {
   item: T;
 };
 
-function Sortable({ id }: { id: number }) {
+const ICONS = {
+  songs: Music,
+  podcast: Mic,
+  radio: Radio,
+  caddy: AudioWaveform,
+};
+
+function Sortable({ itemWithId }: { itemWithId: WithID<RecipeItem> }) {
+  const { id, item } = itemWithId;
   const { setNodeRef, attributes, listeners, transform, transition } =
     useSortable({ id });
   const style = {
@@ -55,22 +63,50 @@ function Sortable({ id }: { id: number }) {
       : undefined,
     transition,
   } as const;
+
+  const ItemIcon = ICONS[item.type];
+  let itemLines: string[];
+  switch (item.type) {
+    case "songs":
+      itemLines = [item.playlist_name, `${item.n_songs} songs`];
+      break;
+    case "podcast":
+      itemLines = [item.podcast_name, item.backup_podcast_name];
+      break;
+    case "radio":
+      itemLines = [item.station_name];
+      break;
+    case "caddy":
+      itemLines = [
+        item.strategy == "file" ? "Play File" : "Cycle Directory",
+        item.url.split("/").pop() || item.url,
+      ];
+      break;
+  }
+
   return (
     <div
       ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       style={style}
-      className="flex rounded-sm p-2 justify-start gap-1.5 bg-black/15 text-white select-none"
+      className={
+        "flex justify-start items-center rounded-sm p-2 gap-1.5 bg-black/15 text-white select-none"
+      }
     >
       <button
         type="button"
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing p-1 -m-1"
+        className="cursor-grab active:cursor-grabbing p-1"
         aria-label="Drag handle"
       >
-        <GripVertical />
+        <GripVertical className="touch-manipulation" />
       </button>
-      Item {id}
+      <ItemIcon className="inline-block" />
+      {/* e.g. title and artists on two lines */}
+      <div className="flex flex-col ml-2">
+        <span className="font-semibold">{itemLines[0]}</span>
+        <span className="text-sm text-white/70">{itemLines[1]}</span>
+      </div>
     </div>
   );
 }
@@ -84,31 +120,31 @@ export default function Page() {
       id: 1,
       item: {
         type: "songs",
-        song_title: "Song Title",
-        artist_name: "Artist Name",
+        playlist_name: "Happy Morning Songs",
+        n_songs: 3,
       },
     },
     {
       id: 2,
       item: {
         type: "podcast",
-        podcast_name: "Podcast Name",
-        backup_podcast_name: "Backup Podcast Name",
+        podcast_name: "World in 10",
+        backup_podcast_name: "Backup: Reuters World News",
       },
     },
     {
       id: 3,
       item: {
-        type: "radio",
-        station_name: "Station Name",
+        type: "caddy",
+        url: "http://vm.peafowl-moth.ts.net:8080/static/mc/01-buna-dimineata.flac",
+        strategy: "file",
       },
     },
     {
       id: 4,
       item: {
-        type: "caddy",
-        url: "https://example.com/file.txt",
-        strategy: "file",
+        type: "radio",
+        station_name: "Radio Romania Actualitati",
       },
     },
   ];
@@ -159,7 +195,7 @@ export default function Page() {
   return (
     <>
       <p className="text-center text-white m-4">
-        Add configuration blocks to procedurally generate your daily playlist.
+        These blocks generate your playlist.
       </p>
       <div className="flex flex-col gap-3 m-3">
         <DndContext
@@ -169,58 +205,64 @@ export default function Page() {
         >
           <SortableContext items={items}>
             {items.map((element) => (
-              <Sortable key={element.id} id={element.id} />
+              <Sortable key={element.id} itemWithId={element} />
             ))}
+            {items.length === 0 && (
+              <div className="text-center py-8 text-white/80">
+                <p>No blocks added yet</p>
+                <p className="text-sm text-white/70">
+                  Add blocks to get started
+                </p>
+              </div>
+            )}
           </SortableContext>
         </DndContext>
       </div>
       <div className="grid grid-cols-2 gap-3 m-3">
         <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-          <Music className="inline-block" />
+          <ICONS.songs className="inline-block" />
           <span>Add Navidrome</span>
         </button>
         <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-          <Mic className="inline-block" />
+          <ICONS.podcast className="inline-block" />
           <span>Add Podcast</span>
         </button>
         <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-          <AudioWaveform className="inline-block" />
+          <ICONS.caddy className="inline-block" />
           <span>Add Caddy File</span>
         </button>
         <button className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}>
-          <Radio className="inline-block" />
+          <ICONS.radio className="inline-block" />
           <span>Add Radio Station</span>
         </button>
       </div>
-      <div>
-        <div className="flex gap-3 m-3">
-          <button
-            type="button"
-            className={
-              GRID_BUTTON_CLASSES +
-              " flex-1 bg-black/35 text-white disabled:opacity-50 " +
-              "disabled:cursor-not-allowed"
-            }
-            disabled={!hasChanges}
-            onClick={handleCancel}
-          >
-            <Eraser className="inline-block" />
-            <span>Cancel Changes</span>
-          </button>
-          <button
-            type="button"
-            className={
-              GRID_BUTTON_CLASSES +
-              " flex-1 bg-salvation-green text-white disabled:opacity-50 " +
-              "disabled:cursor-not-allowed"
-            }
-            disabled={!hasChanges}
-            onClick={handleSave}
-          >
-            <Save className="inline-block" />
-            <span>Save Changes</span>
-          </button>
-        </div>
+      <div className="flex gap-3 m-3">
+        <button
+          type="button"
+          className={
+            GRID_BUTTON_CLASSES +
+            " flex-1 bg-black/35 text-white disabled:opacity-50 " +
+            "disabled:cursor-not-allowed"
+          }
+          disabled={!hasChanges}
+          onClick={handleCancel}
+        >
+          <Eraser className="inline-block" />
+          <span>Cancel Changes</span>
+        </button>
+        <button
+          type="button"
+          className={
+            GRID_BUTTON_CLASSES +
+            " flex-1 bg-salvation-green text-white disabled:opacity-50 " +
+            "disabled:cursor-not-allowed"
+          }
+          disabled={!hasChanges}
+          onClick={handleSave}
+        >
+          <Save className="inline-block" />
+          <span>Save Changes</span>
+        </button>
       </div>
     </>
   );
