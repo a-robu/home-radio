@@ -9,16 +9,20 @@ import {
   Eraser,
   GripVertical,
   Mic,
+  Minus,
   Music,
+  Plus,
   Radio,
   Save,
   Settings,
+  SquarePlus,
   Undo,
 } from "lucide-react";
 import { useState } from "react";
-import { getPlaylists, NavidromePlaylist } from "@/app/lib/navidrome";
+import { getPlaylists } from "@/app/lib/navidrome";
 
 interface SongsBlock {
+  playlist_id: string;
   playlist_name: string;
   n_songs: number;
 }
@@ -128,6 +132,7 @@ export default function Page() {
       id: 1,
       item: {
         type: "songs",
+        playlist_id: "ABCD",
         playlist_name: "Happy Morning Songs",
         n_songs: 3,
       },
@@ -157,21 +162,32 @@ export default function Page() {
     },
   ];
 
-  // const [seq, setSeq] = useState(100);
-  // const nextID = () => {
-  //   setSeq((s) => s + 1);
-  //   return seq;
-  // };
+  const [seq, setSeq] = useState(5);
+  const nextID = () => {
+    let id = seq;
+    setSeq((s) => s + 1);
+    return id;
+  };
+  function withUUID(item: RecipeItem): WithID<RecipeItem> {
+    return { id: nextID(), item };
+  }
 
   const [formState, setFormState] = useState<FormState>({ mode: "ListView" });
   const [items, setItems] = useState(originalItems);
   const [hasChanges, setHasChanges] = useState(false);
   const [navidromePlaylists, setNavidromePlaylists] = useState<
-    NavidromePlaylist[] | undefined
+    | {
+        id: string;
+        name: string;
+        songCount: number;
+        coverArt: string;
+      }[]
+    | undefined
   >(undefined);
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(
-    null
-  );
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<
+    string | undefined
+  >(undefined);
+  const [numSongs, setNumSongs] = useState(3);
 
   function updateHasChanges(newItems: WithID<RecipeItem>[]) {
     // Ignore fields added by dnd-kit
@@ -209,7 +225,7 @@ export default function Page() {
   };
 
   const handleMusicPanelCancel = () => {
-    setSelectedPlaylistId(null);
+    setSelectedPlaylistId(undefined);
     handlePanelCancel();
   };
 
@@ -218,7 +234,24 @@ export default function Page() {
   };
 
   const handleSave = () => {
-    console.log("Saved items:", items);
+    // console.log("Saved items:", items);
+  };
+
+  const handleAddMusicBlock = () => {
+    const selectedPlaylist = navidromePlaylists?.find(
+      (pl) => pl.id === selectedPlaylistId
+    );
+    const newItem: RecipeItem = {
+      type: "songs",
+      playlist_id: selectedPlaylistId!,
+      playlist_name: selectedPlaylist!.name,
+      n_songs: numSongs,
+    };
+    const newItems = [...items, withUUID(newItem)];
+    updateHasChanges(newItems);
+    console.log("New item:", withUUID(newItem));
+    setItems(newItems);
+    handleMusicPanelCancel();
   };
 
   const dndId = useId();
@@ -324,14 +357,14 @@ export default function Page() {
           <ICONS.songs className="inline-block" />
           <span className="ml-1">Adding Navidrome Block</span>
         </p>
-        <p className="text-white p-3">Choose a playlist to play from</p>
-        <div className="flex-1 overflow-y-auto px-3">
+        <p className="text-white p-3">Choose which playlist to play from:</p>
+        <div className="px-3">
           {navidromePlaylists === undefined && (
             <p className="text-white/70">Loading playlists...</p>
           )}
           {navidromePlaylists !== undefined &&
             navidromePlaylists.length === 0 && (
-              <p className="text-white/70">No playlists found</p>
+              <p className="text-white/70">No playlists found.</p>
             )}
           {navidromePlaylists !== undefined && (
             <div role="radiogroup" aria-label="Navidrome playlists">
@@ -376,6 +409,36 @@ export default function Page() {
             </div>
           )}
         </div>
+        <p className="text-white px-3 pb-3">Choose how many songs to play:</p>
+        <div className="flex flex-row justify-center px-3 mb-3">
+          <button
+            className="p-2 bg-black/20 text-white rounded-l disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setNumSongs((n) => Math.max(1, n - 1))}
+            disabled={numSongs <= 1}
+            aria-label="Decrease number of songs"
+          >
+            <Minus />
+          </button>
+          <input
+            type="number"
+            className="text-right w-20 bg-black/10 text-white p-2   border-white/20"
+            value={numSongs}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val) && val >= 1) {
+                setNumSongs(val);
+              }
+            }}
+            aria-label="Number of songs to play"
+          />
+          <button
+            className="p-2 bg-black/20 text-white rounded-r"
+            onClick={() => setNumSongs((n) => n + 1)}
+            aria-label="Increase number of songs"
+          >
+            <Plus />
+          </button>
+        </div>
         <div className="flex gap-3 m-3 mt-auto">
           <button
             type="button"
@@ -393,14 +456,14 @@ export default function Page() {
             type="button"
             className={
               GRID_BUTTON_CLASSES +
-              " flex-1 bg-salvation-green text-white disabled:opacity-50 " +
+              " flex-1 bg-secondary-blue text-white disabled:opacity-50 " +
               "disabled:cursor-not-allowed"
             }
-            disabled={!hasChanges}
-            onClick={handleSave}
+            disabled={selectedPlaylistId === undefined}
+            onClick={handleAddMusicBlock}
           >
-            <Save className="inline-block" />
-            <span>Save Changes</span>
+            <SquarePlus className="inline-block" />
+            <span>Add Block</span>
           </button>
         </div>
       </div>

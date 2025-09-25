@@ -33,14 +33,14 @@ function addNavidromeParams(url: URL) {
 export type NavidromePlaylist = {
   id: string;
   name: string;
-  comment?: string;
-  songCount?: number;
-  duration?: number;
-  public?: boolean;
-  owner?: string;
-  created?: string;
-  changed?: string;
-  coverArt?: string;
+  comment: string;
+  songCount: number;
+  duration: number;
+  public: boolean;
+  owner: string;
+  created: string;
+  changed: string;
+  coverArt: string;
 };
 
 export async function getPlaylists(): Promise<NavidromePlaylist[]> {
