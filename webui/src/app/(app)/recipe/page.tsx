@@ -15,7 +15,9 @@ import {
   Radio,
   Save,
   Settings,
+  SquareCheck,
   SquarePlus,
+  Trash2,
   Undo,
 } from "lucide-react";
 import { useState } from "react";
@@ -60,7 +62,13 @@ const ICONS = {
   caddy: AudioWaveform,
 };
 
-function Sortable({ itemWithId }: { itemWithId: WithID<RecipeItem> }) {
+function Sortable({
+  itemWithId,
+  onSettingsClick,
+}: {
+  itemWithId: WithID<RecipeItem>;
+  onSettingsClick: (id: number) => void;
+}) {
   const { id, item } = itemWithId;
   const { setNodeRef, attributes, listeners, transform, transition } =
     useSortable({ id });
@@ -94,23 +102,31 @@ function Sortable({ itemWithId }: { itemWithId: WithID<RecipeItem> }) {
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       style={style}
       className={
-        "flex justify-start items-center rounded-sm p-2 gap-1.5 bg-black/15 text-white " +
-        "select-none cursor-grab active:cursor-grabbing"
+        "flex justify-start items-center rounded-sm gap-1.5 bg-black/15 text-white " +
+        "select-none "
       }
     >
-      <div className="p-1" aria-label="Drag handle">
-        <GripVertical className="touch-manipulation" />
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center cursor-grab active:cursor-grabbing  p-2 flex-1"
+      >
+        <div className="p-1" aria-label="Drag handle">
+          <GripVertical className="touch-manipulation" />
+        </div>
+        <ItemIcon className="inline-block" />
+        <div className="flex flex-col ml-2">
+          <span className="font-semibold">{itemLines[0]}</span>
+          <span className="text-sm text-white/70">{itemLines[1]}</span>
+        </div>
       </div>
-      <ItemIcon className="inline-block" />
-      <div className="flex flex-col ml-2">
-        <span className="font-semibold">{itemLines[0]}</span>
-        <span className="text-sm text-white/70">{itemLines[1]}</span>
-      </div>
-      <button className="ml-auto p-2 rounded bg-white/10 cursor-pointer">
+      <button
+        className="p-2 m-2 rounded bg-white/10 cursor-pointer"
+        onClick={onSettingsClick.bind(null, id)}
+        aria-label="Edit"
+      >
         <Settings />
       </button>
     </div>
@@ -167,7 +183,7 @@ export default function Page() {
     setSeq((s) => s + 1);
     return id;
   };
-  function withUUID(item: RecipeItem): WithID<RecipeItem> {
+  function withID(item: RecipeItem): WithID<RecipeItem> {
     return { id: nextID(), item };
   }
 
@@ -230,7 +246,7 @@ export default function Page() {
   };
 
   const handleSave = () => {
-    // console.log("Saved items:", items);
+    console.log("Mock handleSave:", items);
   };
 
   const handleAddMusicBlock = () => {
@@ -243,9 +259,35 @@ export default function Page() {
       playlist_name: selectedPlaylist!.name,
       n_songs: numSongs,
     };
-    const newItems = [...items, withUUID(newItem)];
+    const newItems = [...items, withID(newItem)];
     updateHasChanges(newItems);
-    console.log("New item:", withUUID(newItem));
+    console.log("New item:", withID(newItem));
+    setItems(newItems);
+    handleMusicPanelCancel();
+  };
+
+  const handleUpdateMusicBlock = () => {
+    if (formState.mode !== "Edit") {
+      throw new Error("Expected formState.mode to be 'Edit' mode");
+    }
+    const newItem = items[formState.itemIndex].item;
+    if (newItem.type !== "songs") {
+      throw new Error("Expected item to be of type 'songs'");
+    }
+    newItem.playlist_id = selectedPlaylistId!;
+    newItem.n_songs = numSongs;
+    const newItems = [...items];
+    updateHasChanges(newItems);
+    setItems(newItems);
+    handleMusicPanelCancel();
+  };
+
+  const handleMusicPanelDeleteBlock = () => {
+    if (formState.mode !== "Edit") {
+      throw new Error("Expected formState.mode to be 'Edit' mode");
+    }
+    const newItems = items.filter((_, idx) => idx !== formState.itemIndex);
+    updateHasChanges(newItems);
     setItems(newItems);
     handleMusicPanelCancel();
   };
@@ -281,8 +323,23 @@ export default function Page() {
               onDragEnd={handleDragEnd}
             >
               <SortableContext items={items}>
-                {items.map((element) => (
-                  <Sortable key={element.id} itemWithId={element} />
+                {items.map((itemWithId) => (
+                  <Sortable
+                    key={itemWithId.id}
+                    itemWithId={itemWithId}
+                    onSettingsClick={() => {
+                      setFormState({
+                        mode: "Edit",
+                        itemIndex: items.findIndex(
+                          (i) => i.id === itemWithId.id
+                        ),
+                      });
+                      if (itemWithId.item.type === "songs") {
+                        setSelectedPlaylistId(itemWithId.item.playlist_id);
+                        setNumSongs(itemWithId.item.n_songs);
+                      }
+                    }}
+                  />
                 ))}
                 {items.length === 0 && (
                   <div className="text-center py-8 text-white/80">
@@ -450,19 +507,49 @@ export default function Page() {
             <Undo className="inline-block" />
             <span>Cancel</span>
           </button>
-          <button
-            type="button"
-            className={
-              GRID_BUTTON_CLASSES +
-              " flex-1 bg-secondary-blue text-white disabled:opacity-50 " +
-              "disabled:cursor-not-allowed"
-            }
-            disabled={selectedPlaylistId === undefined}
-            onClick={handleAddMusicBlock}
-          >
-            <SquarePlus className="inline-block" />
-            <span>Add Block</span>
-          </button>
+          {formState.mode === "Edit" ? (
+            <>
+              <button
+                type="button"
+                className={
+                  GRID_BUTTON_CLASSES +
+                  " flex-1 bg-danger-red text-white disabled:opacity-50 " +
+                  "disabled:cursor-not-allowed"
+                }
+                onClick={handleMusicPanelDeleteBlock}
+              >
+                <Trash2 className="inline-block" />
+                <span>Delete</span>
+              </button>
+              <button
+                type="button"
+                className={
+                  GRID_BUTTON_CLASSES +
+                  " flex-1 bg-secondary-blue text-white disabled:opacity-50 " +
+                  "disabled:cursor-not-allowed"
+                }
+                disabled={selectedPlaylistId === undefined}
+                onClick={handleUpdateMusicBlock}
+              >
+                <SquareCheck className="inline-block" />
+                <span>Update</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className={
+                GRID_BUTTON_CLASSES +
+                " flex-1 bg-secondary-blue text-white disabled:opacity-50 " +
+                "disabled:cursor-not-allowed"
+              }
+              disabled={selectedPlaylistId === undefined}
+              onClick={handleAddMusicBlock}
+            >
+              <SquarePlus className="inline-block" />
+              <span>Add Block</span>
+            </button>
+          )}
         </div>
       </div>
     );
