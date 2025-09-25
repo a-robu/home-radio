@@ -166,10 +166,12 @@ export default function Page() {
   const [formState, setFormState] = useState<FormState>({ mode: "ListView" });
   const [items, setItems] = useState(originalItems);
   const [hasChanges, setHasChanges] = useState(false);
-
   const [navidromePlaylists, setNavidromePlaylists] = useState<
     NavidromePlaylist[] | undefined
   >(undefined);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(
+    null
+  );
 
   function updateHasChanges(newItems: WithID<RecipeItem>[]) {
     // Ignore fields added by dnd-kit
@@ -204,6 +206,11 @@ export default function Page() {
   const handleCancel = () => {
     setItems(originalItems);
     setHasChanges(false);
+  };
+
+  const handleMusicPanelCancel = () => {
+    setSelectedPlaylistId(null);
+    handlePanelCancel();
   };
 
   const handlePanelCancel = () => {
@@ -258,7 +265,7 @@ export default function Page() {
             </SortableContext>
           </DndContext>
         </div>
-        <div className="grid grid-cols-2 gap-3 m-3">
+        <div className="grid grid-cols-2 gap-3 p-3 bg-relaxing-blue">
           <button
             className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}
             onClick={() => setFormState({ mode: "Add", itemType: "songs" })}
@@ -279,7 +286,7 @@ export default function Page() {
             <span>Add Radio Station</span>
           </button>
         </div>
-        <div className="flex gap-3 m-3">
+        <div className="flex gap-3 p-3">
           <button
             type="button"
             className={
@@ -326,25 +333,48 @@ export default function Page() {
             navidromePlaylists.length === 0 && (
               <p className="text-white/70">No playlists found</p>
             )}
-          {navidromePlaylists !== undefined &&
-            navidromePlaylists.map((pl) => (
-              <div
-                key={pl.id}
-                className="flex items-center gap-3 p-2 rounded-sm bg-black/10 text-white mb-2"
-              >
-                <img
-                  src={`/api/navidrome/get-cover-art?id=${pl.coverArt}&size=64`}
-                  alt=""
-                  className="w-12 h-12 object-cover rounded-sm bg-black/20"
-                />
-                <div className="flex flex-col">
-                  <div className="font-semibold">{pl.name}</div>
-                  <div className="text-sm text-white/70">
-                    {pl.songCount ?? 0} songs
+          {navidromePlaylists !== undefined && (
+            <div role="radiogroup" aria-label="Navidrome playlists">
+              {navidromePlaylists.map((pl) => (
+                <label
+                  key={pl.id}
+                  className={
+                    "flex items-center gap-3 p-2 rounded-sm mb-2 cursor-pointer bg-black/10 " +
+                    "text-white hover:bg-black/20"
+                  }
+                >
+                  <input
+                    type="radio"
+                    name="navidrome-playlist"
+                    value={pl.id}
+                    className="peer sr-only"
+                    onChange={() => setSelectedPlaylistId(pl.id)}
+                  />
+                  <span className="w-5 h-5 inline-grid place-items-center rounded-full border-2 border-white/70 peer-checked:border-white">
+                    <span
+                      className="w-3 h-3 rounded-full bg-white"
+                      style={{
+                        display:
+                          selectedPlaylistId === pl.id ? "initial" : "none",
+                      }}
+                    />
+                  </span>
+
+                  <img
+                    src={`/api/navidrome/get-cover-art?id=${pl.coverArt}&size=64`}
+                    alt=""
+                    className="w-12 h-12 object-cover rounded-sm bg-black/20"
+                  />
+                  <div className="flex flex-col">
+                    <div className="font-semibold">{pl.name}</div>
+                    <div className="text-sm text-white/70">
+                      {pl.songCount ?? 0} songs
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex gap-3 m-3 mt-auto">
           <button
@@ -354,7 +384,7 @@ export default function Page() {
               " flex-1 bg-black/35 text-white disabled:opacity-50 " +
               "disabled:cursor-not-allowed"
             }
-            onClick={handlePanelCancel}
+            onClick={handleMusicPanelCancel}
           >
             <Undo className="inline-block" />
             <span>Cancel</span>

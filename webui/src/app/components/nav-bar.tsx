@@ -15,7 +15,7 @@ export function NavBar() {
   ];
 
   return (
-    <div className="border-t border-white/30 px-4 py-2 flex justify-between bg-foundation-navy">
+    <div className="border-t border-white/30 px-4 py-2 flex justify-between bg-navbar-navy">
       {tabs.map(({ label, icon: Icon, path }) => (
         <Link
           key={path}

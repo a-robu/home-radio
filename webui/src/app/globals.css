@@ -17,7 +17,8 @@ a {
 
 @theme {
   --color-relaxing-purple: rgb(92, 82, 133);
-  --color-foundation-navy: rgb(4, 22, 32);
+  --color-relaxing-blue: #546575;
+  --color-navbar-navy: rgb(4, 22, 32);
   --color-knob-white: #fdfcff;
   --color-salvation-green: rgb(0, 153, 102);
 }
