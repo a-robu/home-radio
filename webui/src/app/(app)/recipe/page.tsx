@@ -12,6 +12,7 @@ import {
   Music,
   Radio,
   Save,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -91,28 +92,28 @@ function Sortable({ itemWithId }: { itemWithId: WithID<RecipeItem> }) {
       {...listeners}
       style={style}
       className={
-        "flex justify-start items-center rounded-sm p-2 gap-1.5 bg-black/15 text-white select-none"
+        "flex justify-start items-center rounded-sm p-2 gap-1.5 bg-black/15 text-white " +
+        "select-none cursor-grab active:cursor-grabbing"
       }
     >
-      <button
-        type="button"
-        className="cursor-grab active:cursor-grabbing p-1"
-        aria-label="Drag handle"
-      >
+      <div className="p-1" aria-label="Drag handle">
         <GripVertical className="touch-manipulation" />
-      </button>
+      </div>
       <ItemIcon className="inline-block" />
       {/* e.g. title and artists on two lines */}
       <div className="flex flex-col ml-2">
         <span className="font-semibold">{itemLines[0]}</span>
         <span className="text-sm text-white/70">{itemLines[1]}</span>
       </div>
+      <button className="ml-auto p-2 rounded bg-white/10">
+        <Settings />
+      </button>
     </div>
   );
 }
 
 const GRID_BUTTON_CLASSES =
-  "flex justify-center gap-1.5 px-2 py-2 cursor-pointer rounded-sm";
+  "flex justify-center gap-1.5 px-2 py-2 cursor-pointer rounded-sm select-none";
 
 export default function Page() {
   const originalItems: WithID<RecipeItem>[] = [
