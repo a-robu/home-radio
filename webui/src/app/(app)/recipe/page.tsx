@@ -1,20 +1,12 @@
 "use client";
 
-import { useEffect, useId } from "react";
-import { DndContext } from "@dnd-kit/core";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { useEffect } from "react";
+import RecipeList from "@/app/components/recipe-list";
 import {
-  AudioWaveform,
   Eraser,
-  GripVertical,
-  Mic,
   Minus,
-  Music,
   Plus,
-  Radio,
   Save,
-  Settings,
   SquareCheck,
   SquarePlus,
   Trash2,
@@ -22,117 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { getPlaylists } from "@/app/lib/navidrome";
-
-interface SongsBlock {
-  playlist_id: string;
-  playlist_name: string;
-  n_songs: number;
-}
-
-interface PodcastBlock {
-  podcast_name: string;
-  backup_podcast_name: string;
-}
-
-interface RadioStationBlock {
-  station_name: string;
-}
-
-interface CaddyFileBlock {
-  url: string;
-  strategy: "file" | "cycle";
-}
-
-// Discriminated union for all recipe items
-type RecipeItem =
-  | ({ type: "songs" } & SongsBlock)
-  | ({ type: "podcast" } & PodcastBlock)
-  | ({ type: "radio" } & RadioStationBlock)
-  | ({ type: "caddy" } & CaddyFileBlock);
-
-type WithID<T> = {
-  id: number;
-  item: T;
-};
-
-const ICONS = {
-  songs: Music,
-  podcast: Mic,
-  radio: Radio,
-  caddy: AudioWaveform,
-};
-
-function Sortable({
-  itemWithId,
-  onSettingsClick,
-}: {
-  itemWithId: WithID<RecipeItem>;
-  onSettingsClick: (id: number) => void;
-}) {
-  const { id, item } = itemWithId;
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({ id });
-  const style = {
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : undefined,
-    transition,
-  } as const;
-
-  const ItemIcon = ICONS[item.type];
-  let itemLines: string[];
-  switch (item.type) {
-    case "songs":
-      itemLines = [item.playlist_name, `${item.n_songs} songs`];
-      break;
-    case "podcast":
-      itemLines = [item.podcast_name, item.backup_podcast_name];
-      break;
-    case "radio":
-      itemLines = [item.station_name];
-      break;
-    case "caddy":
-      itemLines = [
-        item.strategy == "file" ? "Play File" : "Cycle Directory",
-        item.url.split("/").pop() || item.url,
-      ];
-      break;
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={
-        "flex justify-start items-center rounded-sm gap-1.5 bg-black/15 text-white " +
-        "select-none "
-      }
-    >
-      <div
-        {...attributes}
-        {...listeners}
-        className="flex items-center cursor-grab active:cursor-grabbing  p-2 flex-1"
-      >
-        <div className="p-1" aria-label="Drag handle">
-          <GripVertical className="touch-manipulation" />
-        </div>
-        <ItemIcon className="inline-block" />
-        <div className="flex flex-col ml-2">
-          <span className="font-semibold">{itemLines[0]}</span>
-          <span className="text-sm text-white/70">{itemLines[1]}</span>
-        </div>
-      </div>
-      <button
-        className="p-2 m-2 rounded bg-white/10 cursor-pointer"
-        onClick={onSettingsClick.bind(null, id)}
-        aria-label="Edit"
-      >
-        <Settings />
-      </button>
-    </div>
-  );
-}
-
+import { ICONS, RecipeItem, withID, WithID } from "@/app/lib/recipe";
 type FormState =
   | { mode: "ListView" }
   | { mode: "Add"; itemType: RecipeItem["type"] }
@@ -143,52 +25,30 @@ const GRID_BUTTON_CLASSES =
 
 export default function Page() {
   const originalItems: WithID<RecipeItem>[] = [
-    {
-      id: 1,
-      item: {
-        type: "songs",
-        playlist_id: "ABCD",
-        playlist_name: "Happy Morning Songs",
-        n_songs: 3,
-      },
-    },
-    {
-      id: 2,
-      item: {
-        type: "podcast",
-        podcast_name: "World in 10",
-        backup_podcast_name: "Backup: Reuters World News",
-      },
-    },
-    {
-      id: 3,
-      item: {
-        type: "caddy",
-        url: "http://vm.peafowl-moth.ts.net:8080/static/mc/01-buna-dimineata.flac",
-        strategy: "file",
-      },
-    },
-    {
-      id: 4,
-      item: {
-        type: "radio",
-        station_name: "Radio Romania Actualitati",
-      },
-    },
+    withID({
+      type: "songs",
+      playlist_id: "ABCD",
+      playlist_name: "Happy Morning Songs",
+      n_songs: 3,
+    }),
+    withID({
+      type: "podcast",
+      podcast_name: "World in 10",
+      backup_podcast_name: "Backup: Reuters World News",
+    }),
+    withID({
+      type: "caddy",
+      url: "http://vm.peafowl-moth.ts.net:8080/static/mc/01-buna-dimineata.flac",
+      strategy: "file",
+    }),
+    withID({
+      type: "radio",
+      station_name: "Radio Romania Actualitati",
+    }),
   ];
 
-  const [seq, setSeq] = useState(11);
-  const nextID = () => {
-    let id = seq;
-    setSeq((s) => s + 1);
-    return id;
-  };
-  function withID(item: RecipeItem): WithID<RecipeItem> {
-    return { id: nextID(), item };
-  }
-
   const [formState, setFormState] = useState<FormState>({ mode: "ListView" });
-  const [items, setItems] = useState(originalItems);
+  const [items, setItems] = useState<WithID<RecipeItem>[]>(originalItems);
   const [hasChanges, setHasChanges] = useState(false);
   const [navidromePlaylists, setNavidromePlaylists] = useState<
     | {
@@ -202,33 +62,25 @@ export default function Page() {
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<
     string | undefined
   >(undefined);
-  const [numSongs, setNumSongs] = useState(3);
+  const [numSongs, setNumSongs] = useState(1);
 
-  function updateHasChanges(newItems: WithID<RecipeItem>[]) {
-    // Ignore fields added by dnd-kit
+  useEffect(() => {
     const filteredOriginal = originalItems.map(({ item }) => item);
-    const filteredNew = newItems.map(({ item }) => item);
+    const filteredNew = items.map(({ item }) => item);
     setHasChanges(
       // TODO use a better deep equality check
       !(JSON.stringify(filteredOriginal) === JSON.stringify(filteredNew))
     );
-  }
+  }, [items]);
 
-  const handleDragEnd = (event: any) => {
-    const activeId = event.active.id;
-    const overId = event.over.id;
+  const handleSwap = (activeId: string, overId: string) => {
+    const oldIndex = items.findIndex((i) => i.id === activeId);
+    const newIndex = items.findIndex((i) => i.id === overId);
 
-    if (activeId !== overId) {
-      setItems((items) => {
-        const oldIndex = items.findIndex((i) => i.id === activeId);
-        const newIndex = items.findIndex((i) => i.id === overId);
-        const newItems = [...items];
-        newItems.splice(oldIndex, 1);
-        newItems.splice(newIndex, 0, items[oldIndex]);
-        updateHasChanges(newItems);
-        return newItems;
-      });
-    }
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(oldIndex, 1);
+    newItems.splice(newIndex, 0, movedItem);
+    setItems(newItems);
   };
 
   const handleCancel = () => {
@@ -238,6 +90,7 @@ export default function Page() {
 
   const handleMusicPanelCancel = () => {
     setSelectedPlaylistId(undefined);
+    setNumSongs(1);
     handlePanelCancel();
   };
 
@@ -260,7 +113,6 @@ export default function Page() {
       n_songs: numSongs,
     };
     const newItems = [...items, withID(newItem)];
-    updateHasChanges(newItems);
     console.log("New item:", withID(newItem));
     setItems(newItems);
     handleMusicPanelCancel();
@@ -270,14 +122,20 @@ export default function Page() {
     if (formState.mode !== "Edit") {
       throw new Error("Expected formState.mode to be 'Edit' mode");
     }
-    const newItem = items[formState.itemIndex].item;
-    if (newItem.type !== "songs") {
+    const currentItem = items[formState.itemIndex].item;
+    if (currentItem.type !== "songs") {
       throw new Error("Expected item to be of type 'songs'");
     }
-    newItem.playlist_id = selectedPlaylistId!;
-    newItem.n_songs = numSongs;
+    const updated: RecipeItem = {
+      ...currentItem,
+      playlist_id: selectedPlaylistId!,
+      n_songs: numSongs,
+    };
     const newItems = [...items];
-    updateHasChanges(newItems);
+    newItems[formState.itemIndex] = {
+      ...newItems[formState.itemIndex],
+      item: updated,
+    };
     setItems(newItems);
     handleMusicPanelCancel();
   };
@@ -287,12 +145,9 @@ export default function Page() {
       throw new Error("Expected formState.mode to be 'Edit' mode");
     }
     const newItems = items.filter((_, idx) => idx !== formState.itemIndex);
-    updateHasChanges(newItems);
     setItems(newItems);
     handleMusicPanelCancel();
   };
-
-  const dndId = useId();
 
   useEffect(() => {
     if (
@@ -316,42 +171,23 @@ export default function Page() {
           <p className="text-center text-white m-4">
             These blocks generate your playlist.
           </p>
-          <div className="flex flex-col gap-3 m-3">
-            <DndContext
-              id={dndId}
-              modifiers={[restrictToVerticalAxis]}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={items}>
-                {items.map((itemWithId) => (
-                  <Sortable
-                    key={itemWithId.id}
-                    itemWithId={itemWithId}
-                    onSettingsClick={() => {
-                      setFormState({
-                        mode: "Edit",
-                        itemIndex: items.findIndex(
-                          (i) => i.id === itemWithId.id
-                        ),
-                      });
-                      if (itemWithId.item.type === "songs") {
-                        setSelectedPlaylistId(itemWithId.item.playlist_id);
-                        setNumSongs(itemWithId.item.n_songs);
-                      }
-                    }}
-                  />
-                ))}
-                {items.length === 0 && (
-                  <div className="text-center py-8 text-white/80">
-                    <p>No blocks added yet</p>
-                    <p className="text-sm text-white/70">
-                      Add blocks to get started
-                    </p>
-                  </div>
-                )}
-              </SortableContext>
-            </DndContext>
-          </div>
+          <RecipeList
+            className="m-3"
+            items={items}
+            onSwap={handleSwap}
+            onRowSettingsClick={(id) => {
+              let index = items.findIndex((x) => x.id === id);
+              let item = items[index].item;
+              setFormState({
+                mode: "Edit",
+                itemIndex: index,
+              });
+              if (item.type === "songs") {
+                setSelectedPlaylistId(item.playlist_id);
+                setNumSongs(item.n_songs);
+              }
+            }}
+          />
           <div className="grid grid-cols-2 gap-3 p-3 bg-relaxing-blue">
             <button
               className={GRID_BUTTON_CLASSES + " bg-black/15 text-white"}
@@ -386,7 +222,7 @@ export default function Page() {
             onClick={handleCancel}
           >
             <Eraser className="inline-block" />
-            <span>Cancel Changes</span>
+            <span>Cancel</span>
           </button>
           <button
             type="button"
