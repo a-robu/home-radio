@@ -98,7 +98,12 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
                   onChange={() => handlePlaylistChange(pl)}
                   checked={current.playlist?.id === pl.id}
                 />
-                <span className="w-5 h-5 inline-grid place-items-center rounded-full border-2 border-white/70 peer-checked:border-white">
+                <span
+                  className={
+                    "w-5 h-5 inline-grid place-items-center rounded-full border-2 " +
+                    "border-white/70 peer-checked:border-white"
+                  }
+                >
                   <span
                     className="w-3 h-3 rounded-full bg-white"
                     style={{
@@ -129,7 +134,10 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
       <div className="flex flex-row justify-center px-3 mb-3">
         <button
           type="button"
-          className="p-2 bg-black/20 text-white rounded-l disabled:opacity-50 disabled:cursor-not-allowed"
+          className={
+            "p-2 bg-black/20 text-white rounded-l disabled:opacity-50 " +
+            "disabled:cursor-not-allowed"
+          }
           onClick={() => handleNumSongsChange(-1)}
           disabled={current.n_songs <= 1}
           aria-label="Decrease number of songs"
