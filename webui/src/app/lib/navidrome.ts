@@ -48,8 +48,21 @@ export async function getPlaylists(): Promise<NavidromePlaylist[]> {
   const url = new URL("/rest/getPlaylists.view", baseUrl);
   addNavidromeParams(url);
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  let res: Response | undefined;
+  let error: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      res = await fetch(url.toString(), { cache: "no-store" });
+      if (res.ok) {
+        break;
+      }
+      error = new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      error = e as Error;
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  if (!res || !res.ok) throw error ?? new Error("Fetch failed");
   const data = await res.json();
   const playlists = data["subsonic-response"]?.playlists?.playlist ?? [];
   return playlists as NavidromePlaylist[];
