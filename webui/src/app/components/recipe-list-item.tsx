@@ -24,7 +24,7 @@ export default function RecipeListItem({
   let itemLines: string[];
   switch (item.type) {
     case "songs":
-      itemLines = [item.playlist_name, `${item.n_songs} songs`];
+      itemLines = [item.playlist.name, `${item.n_songs} songs`];
       break;
     case "podcast":
       itemLines = [item.podcast_name, item.backup_podcast_name];

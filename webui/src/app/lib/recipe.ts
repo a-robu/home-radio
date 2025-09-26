@@ -11,9 +11,14 @@ export function withID(item: RecipeItem): WithID<RecipeItem> {
   return { id: uuidv4(), item };
 }
 
-type SongsBlock = {
-  playlist_id: string;
-  playlist_name: string;
+export type PlaylistInfo = {
+  id: string;
+  name: string;
+  cover_art: string;
+};
+
+export type SongsBlock = {
+  playlist: PlaylistInfo;
   n_songs: number;
 };
 
