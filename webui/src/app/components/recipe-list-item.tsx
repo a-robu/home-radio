@@ -6,10 +6,14 @@ export default function RecipeListItem({
   item,
   sortableId,
   onSettingsClick,
+  isDragging = false,
+  isOverlay = false,
 }: {
   item: RecipeItem;
   sortableId: string;
   onSettingsClick: () => void;
+  isDragging?: boolean;
+  isOverlay?: boolean;
 }) {
   const { setNodeRef, attributes, listeners, transform, transition } =
     useSortable({ id: sortableId });
@@ -45,16 +49,23 @@ export default function RecipeListItem({
       ref={setNodeRef}
       style={style}
       className={
-        "flex justify-start items-center rounded-sm gap-1.5 bg-black/15 text-white " +
-        "select-none "
+        "flex justify-start items-center rounded-sm gap-1.5 text-white select-none touch-pan-y md:touch-auto " +
+        (isOverlay
+          ? " bg-overbright-purple "
+          : isDragging
+          ? " bg-white/20 "
+          : " bg-black/15 ")
       }
     >
       <div
+        className={
+          "flex items-center p-2 flex-1 cursor-grab active:cursor-grabbing " +
+          (isDragging ? " opacity-0 " : "")
+        }
         {...attributes}
         {...listeners}
-        className="flex items-center cursor-grab active:cursor-grabbing  p-2 flex-1"
       >
-        <div className="p-1" aria-label="Drag handle">
+        <div className="p-1 " aria-label="Drag handle">
           <GripVertical className="touch-manipulation" />
         </div>
         <ItemIcon className="inline-block" />
@@ -64,7 +75,12 @@ export default function RecipeListItem({
         </div>
       </div>
       <button
-        className="p-2 m-2 rounded bg-white/10 cursor-pointer"
+        className={
+          "p-2 m-2 rounded bg-white/10 cursor-pointer " +
+          (isDragging ? " opacity-0 pointer-events-none " : "")
+        }
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={onSettingsClick}
         aria-label="Edit"
       >
