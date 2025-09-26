@@ -5,6 +5,7 @@ import type { RecipeItem, SongsBlock } from "@/app/lib/recipe";
 import type { MakeNullable } from "@/app/lib/type-utils";
 import { Minus, Plus } from "lucide-react";
 import { getPlaylists, NavidromePlaylist } from "../lib/navidrome";
+import { useBlockForm } from "@/app/components/forms/useBlockForm";
 
 type DraftSongsBlock = MakeNullable<SongsBlock, "playlist">;
 
@@ -24,7 +25,11 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
   const [fetchedPlaylists, setFetchedPlaylists] = useState<
     NavidromePlaylist[] | undefined
   >(undefined);
-  const [current, setCurrent] = useState(SONG_BLOCK_DEFAULTS);
+
+  const { draft, setField } = useBlockForm<DraftSongsBlock>({
+    prefill: prefill,
+    defaults: SONG_BLOCK_DEFAULTS,
+  });
 
   useEffect(() => {
     (async () => {
@@ -32,43 +37,30 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
     })();
   }, []);
 
-  // Refill form if the prefill changes
+  // Local validation and notification
   useEffect(() => {
-    if (prefill === null) {
-      setCurrent(SONG_BLOCK_DEFAULTS);
-    } else {
-      setCurrent(prefill);
-    }
-  }, [prefill]);
-
-  function handlePlaylistChange(ndPlaylist: NavidromePlaylist) {
-    setCurrent((curr) => ({
-      ...curr,
-      playlist: {
-        id: ndPlaylist.id,
-        name: ndPlaylist.name,
-        cover_art: ndPlaylist.coverArt,
-      },
-    }));
-  }
-
-  function handleNumSongsChange(amount: number) {
-    setCurrent((curr) => ({
-      ...curr,
-      n_songs: Math.max(1, (curr.n_songs ?? 1) + amount),
-    }));
-  }
-
-  useEffect(() => {
-    if (current.playlist !== null && current.n_songs >= 1) {
+    if (draft.playlist !== null && (draft.n_songs ?? 0) >= 1) {
       onValidChange({
         type: "songs",
-        ...(current as SongsBlock),
+        playlist: draft.playlist as SongsBlock["playlist"],
+        n_songs: draft.n_songs ?? 1,
       });
     } else {
       onValidChange(null);
     }
-  }, [current]);
+  }, [draft, onValidChange]);
+
+  function handlePlaylistChange(ndPlaylist: NavidromePlaylist) {
+    setField("playlist", {
+      id: ndPlaylist.id,
+      name: ndPlaylist.name,
+      cover_art: ndPlaylist.coverArt,
+    });
+  }
+
+  function handleNumSongsChange(amount: number) {
+    setField("n_songs", Math.max(1, (draft.n_songs ?? 1) + amount));
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -96,7 +88,7 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
                   value={pl.id}
                   className="peer sr-only"
                   onChange={() => handlePlaylistChange(pl)}
-                  checked={current.playlist?.id === pl.id}
+                  checked={draft.playlist?.id === pl.id}
                 />
                 <span
                   className={
@@ -108,7 +100,7 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
                     className="w-3 h-3 rounded-full bg-white"
                     style={{
                       display:
-                        current.playlist?.id === pl.id ? "initial" : "none",
+                        draft.playlist?.id === pl.id ? "initial" : "none",
                     }}
                   />
                 </span>
@@ -139,7 +131,7 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
             "disabled:cursor-not-allowed"
           }
           onClick={() => handleNumSongsChange(-1)}
-          disabled={current.n_songs <= 1}
+          disabled={draft.n_songs <= 1}
           aria-label="Decrease number of songs"
         >
           <Minus />
@@ -147,17 +139,14 @@ export default function SongForm({ prefill, onValidChange }: SongFormProps) {
         <input
           type="number"
           className="text-right w-20 bg-black/10 text-white p-2   border-white/20"
-          value={current.n_songs}
+          value={draft.n_songs}
           onChange={(e) => {
             const val = parseInt(e.target.value, 10);
             let parsedValue = 1;
             if (!Number.isNaN(val) && val >= 1) {
               parsedValue = val;
             }
-            setCurrent((curr) => ({
-              ...curr,
-              n_songs: parsedValue,
-            }));
+            setField("n_songs", parsedValue);
           }}
           aria-label="Number of songs to play"
           min={1}

@@ -47,7 +47,7 @@ export default function RecipeForm({
         </span>
       </p>
     );
-  }, [subject.mode]);
+  }, [subject.mode, itemType]);
 
   const renderChildForm = () => {
     if (itemType === "songs") {
