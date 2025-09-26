@@ -5,7 +5,7 @@ import type { RecipeItem, SongsBlock } from "@/app/lib/recipe";
 import type { MakeNullable } from "@/app/lib/type-utils";
 import { Minus, Plus } from "lucide-react";
 import { getPlaylists, NavidromePlaylist } from "../lib/navidrome";
-import { useBlockForm } from "@/app/components/forms/useBlockForm";
+import { useBlockForm } from "@/app/components/forms/use-block-form";
 
 type DraftSongsBlock = MakeNullable<SongsBlock, "playlist">;
 
